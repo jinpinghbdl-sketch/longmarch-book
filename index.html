@@ -105,6 +105,7 @@ var fsImg=document.getElementById("fsImg");
 var currentPage=0;
 var autoSync=true;
 var autoFlipped=false;
+var flipTimer=null;
 var isPlaying=false;
 
 for(var i=0;i<TOTAL_PAGES;i++){
@@ -145,6 +146,7 @@ function showPage(idx){
     }
   }
   autoFlipped=false;
+  if(flipTimer){clearTimeout(flipTimer);flipTimer=null;}
 }
 
 audio.addEventListener("timeupdate",function(){
@@ -160,15 +162,24 @@ audio.addEventListener("timeupdate",function(){
     }
     return;
   }
-  if(!autoFlipped&&ct>=seg.endTime){
-    autoFlipped=true;
-    if(currentPage<TOTAL_PAGES-1){
-      showPage(currentPage+1);
-    }else{
-      audio.pause();
-      isPlaying=false;
-      btnPlay.innerHTML="\u25B6";
+  if(ct>=seg.endTime){
+    if(!autoFlipped){
+      autoFlipped=true;
+      if(flipTimer)clearTimeout(flipTimer);
+      flipTimer=setTimeout(function(){
+        flipTimer=null;
+        autoFlipped=false;
+        if(currentPage<TOTAL_PAGES-1){
+          showPage(currentPage+1);
+        }else{
+          audio.pause();
+          isPlaying=false;
+          btnPlay.innerHTML="\u25B6";
+        }
+      },2000);
     }
+  }else{
+    if(flipTimer){clearTimeout(flipTimer);flipTimer=null;autoFlipped=false;}
   }
 });
 
